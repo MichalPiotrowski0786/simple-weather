@@ -8,8 +8,7 @@
     />
     <button @click="onCityButtonClicked" id="cityButtonWrapper">Search</button>
     <div v-if="isResultVisible" id="resultWrapper">
-      <p>City: {{ city }}</p>
-      <p>Country: {{ country }}</p>
+      <p>Location: {{ city }}, {{ country }}</p>
       <p>Temperature: {{ temperature }} °C</p>
       <p>Pressure: {{ pressure }} hpa</p>
       <p>Humidity: {{ humidity }}%</p>
