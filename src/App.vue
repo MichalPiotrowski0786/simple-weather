@@ -1,7 +1,6 @@
 <template>
   <div id="nav">
-    <router-link to="/">Home</router-link> |
-    <router-link to="/about">About</router-link>
+    <h1><b><a href="/">Weather.in</a></b></h1>
   </div>
   <router-view/>
 </template>
@@ -12,19 +11,19 @@
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   text-align: center;
-  color: #2c3e50;
+  color: black;
 }
-
 #nav {
-  padding: 30px;
-
-  a {
-    font-weight: bold;
-    color: #2c3e50;
-
-    &.router-link-exact-active {
-      color: #42b983;
-    }
-  }
+  text-align: left;
+  padding-left: 20px;
+  font-size: 30px;
+  text-shadow: 1px 1px white;
+}
+a {
+  color: rgb(51,51,51);
+  text-decoration-line: none;
+}
+a:hover {
+  color: black;
 }
 </style>
