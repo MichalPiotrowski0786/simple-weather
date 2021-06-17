@@ -14,12 +14,12 @@
       <p>Humidity: {{ humidity }}%</p>
       <p>Wind Speed: {{ wind_speed }}</p>
       <p>Wind Gust: {{ wind_gust }}</p>
+      <p>Wind Direction: {{ wind_dir }}</p>
     </div>
   </div>
 </template>
 
 <script>
-const apiKey = '75631f06853d699bf264f477854dd2a9';
 export default {
   name: 'MainComponent',
   data() {
@@ -33,6 +33,7 @@ export default {
       humidity: '',
       wind_speed: '',
       wind_gust: '',
+      wind_dir: '',
       isResultVisible: false,
     };
   },
@@ -40,7 +41,7 @@ export default {
     async onCityButtonClicked() {
       this.isResultVisible = false;
       await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${this.cityForModel}&appid=${apiKey}&units=metric`,
+        `https://api.openweathermap.org/data/2.5/weather?q=${this.cityForModel}&appid=${process.env.KEY}&units=metric`,
         {
           method: 'GET',
         },
@@ -49,6 +50,7 @@ export default {
           res
             .json()
             .then((data) => {
+              console.log(data);
               this.city = data.name;
               this.country = data.sys.country;
               this.temperature = data.main.temp;
@@ -58,6 +60,7 @@ export default {
                 data.wind.speed
               } m/s (${this.calculateWindInKPH(data.wind.speed)} km/h)`;
               this.wind_gust = this.setWindGustResult(data.wind.gust);
+              this.wind_dir = data.wind.deg;
               this.isResultVisible = true;
             })
             .catch((err) => console.error(err));
