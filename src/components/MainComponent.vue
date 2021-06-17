@@ -41,7 +41,7 @@ export default {
     async onCityButtonClicked() {
       this.isResultVisible = false;
       await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${this.cityForModel}&appid=${process.env.KEY}&units=metric`,
+        `https://api.openweathermap.org/data/2.5/weather?q=${this.cityForModel}&appid=${process.env.VUE_APP_API_KEY}&units=metric`,
         {
           method: 'GET',
         },
@@ -50,7 +50,6 @@ export default {
           res
             .json()
             .then((data) => {
-              console.log(data);
               this.city = data.name;
               this.country = data.sys.country;
               this.temperature = data.main.temp;
