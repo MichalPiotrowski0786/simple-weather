@@ -2,7 +2,7 @@
   <div>
     <div id="home">
       <div id="sidebar">
-        <router-link to="/radar">Radar</router-link>
+        <router-link to="/radar">Radars</router-link>
       </div>
       <div id="main">
         <MainComponent/>

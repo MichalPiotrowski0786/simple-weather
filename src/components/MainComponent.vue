@@ -49,13 +49,14 @@ export default {
           res
             .json()
             .then((data) => {
-              console.log(data);
               this.city = data.name;
               this.country = data.sys.country;
               this.temperature = data.main.temp;
               this.pressure = data.main.pressure;
               this.humidity = data.main.humidity;
-              this.wind_speed = `${data.wind.speed} m/s (${this.calculateWindInKPH(data.wind.speed)} km/h)`;
+              this.wind_speed = `${
+                data.wind.speed
+              } m/s (${this.calculateWindInKPH(data.wind.speed)} km/h)`;
               this.wind_gust = this.setWindGustResult(data.wind.gust);
               this.isResultVisible = true;
             })
