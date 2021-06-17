@@ -1,6 +1,7 @@
 import { createRouter, createWebHashHistory } from 'vue-router';
 import Home from '../views/Home.vue';
 import Radar from '../components/RadarComponent.vue';
+import Synop from '../components/SynopComponent.vue';
 
 const routes = [
   {
@@ -12,6 +13,11 @@ const routes = [
     path: '/radar',
     name: 'Radar',
     component: Radar,
+  },
+  {
+    path: '/synop',
+    name: 'Synop',
+    component: Synop,
   },
 ];
 

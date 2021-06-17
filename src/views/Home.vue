@@ -2,7 +2,8 @@
   <div>
     <div id="home">
       <div id="sidebar">
-        <router-link to="/radar">Radars</router-link>
+        <router-link to="/radar">Radars</router-link><br/><br/>
+        <router-link to="/synop">IMGW Synop</router-link>
       </div>
       <div id="main">
         <MainComponent/>

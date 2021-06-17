@@ -26,4 +26,11 @@ a {
 a:hover {
   color: black;
 }
+#resultWrapper {
+  padding-top: 20px;
+  font-size: 30px;
+  font-weight: bold;
+  text-decoration-line: underline;
+  text-decoration-color: rgba(0, 0, 0, 0.4);
+}
 </style>

@@ -1,7 +1,7 @@
 <template>
   <div>
     <input
-      v-model="cityForModel"
+      v-model="cityToSearch"
       id="cityInputWrapper"
       type="text"
       placeholder="Type location to see weather..."
@@ -24,7 +24,7 @@ export default {
   name: 'MainComponent',
   data() {
     return {
-      cityForModel: '',
+      cityToSearch: '',
       tempData: {},
       city: '',
       country: '',
@@ -40,8 +40,9 @@ export default {
   methods: {
     async onCityButtonClicked() {
       this.isResultVisible = false;
+      const apiLink = `https://api.openweathermap.org/data/2.5/weather?q=${this.cityToSearch}&appid=${process.env.VUE_APP_API_KEY}&units=metric`;
       await fetch(
-        `https://api.openweathermap.org/data/2.5/weather?q=${this.cityForModel}&appid=${process.env.VUE_APP_API_KEY}&units=metric`,
+        apiLink,
         {
           method: 'GET',
         },
@@ -101,12 +102,5 @@ export default {
   background-color: rgb(200, 200, 200);
   border: 2px solid black;
   margin: 20px;
-}
-#resultWrapper {
-  padding-top: 20px;
-  font-size: 30px;
-  font-weight: bold;
-  text-decoration-line: underline;
-  text-decoration-color: rgba(0, 0, 0, 0.4);
 }
 </style>
