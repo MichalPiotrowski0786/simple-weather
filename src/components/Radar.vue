@@ -3,18 +3,18 @@
     <div id="RadarImagesWrapper">
       <h2>CAPPI</h2>
       <img
-      id="RadarImageWrapper"
-      :src="linkCAPPI"
+        id="RadarImageWrapper"
+        :src="linkCAPPI"
       >
       <h2>CMAX</h2>
       <img
-      id="RadarImageWrapper"
-      :src="linkCMAX"
+        id="RadarImageWrapper"
+        :src="linkCMAX"
       >
       <h2>PAC(1hr accumulated rainfall)</h2>
       <img
-      id="RadarImageWrapper"
-      :src="linkPAC"
+        id="RadarImageWrapper"
+        :src="linkPAC"
       >
     </div>
   </div>

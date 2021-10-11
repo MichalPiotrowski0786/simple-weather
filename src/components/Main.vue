@@ -1,13 +1,21 @@
 <template>
   <div>
     <input
-      v-model="cityToSearch"
       id="cityInputWrapper"
+      v-model="cityToSearch"
       type="text"
       placeholder="Type location to see weather..."
-    />
-    <button @click="onCityButtonClicked" id="cityButtonWrapper">Search</button>
-    <div v-if="isResultVisible" id="resultWrapper">
+    >
+    <button
+      id="cityButtonWrapper"
+      @click="onCityButtonClicked"
+    >
+      Search
+    </button>
+    <div
+      v-if="isResultVisible"
+      id="resultWrapper"
+    >
       <p>Location: {{ city }}, {{ country }}</p>
       <p>Temperature: {{ temperature }} °C</p>
       <p>Pressure: {{ pressure }} hpa</p>
@@ -41,12 +49,9 @@ export default {
     async onCityButtonClicked() {
       this.isResultVisible = false;
       const apiLink = `https://api.openweathermap.org/data/2.5/weather?q=${this.cityToSearch}&appid=${process.env.VUE_APP_API_KEY}&units=metric`;
-      await fetch(
-        apiLink,
-        {
-          method: 'GET',
-        },
-      )
+      await fetch(apiLink, {
+        method: 'GET',
+      })
         .then((res) => {
           res
             .json()
@@ -56,9 +61,9 @@ export default {
               this.temperature = data.main.temp;
               this.pressure = data.main.pressure;
               this.humidity = data.main.humidity;
-              this.wind_speed = `${
-                data.wind.speed
-              } m/s (${this.calculateWindInKPH(data.wind.speed)} km/h)`;
+              this.wind_speed = `${data.wind.speed} m/s (${this.calculateWindInKPH(
+                data.wind.speed,
+              )} km/h)`;
               this.wind_gust = this.setWindGustResult(data.wind.gust);
               this.wind_dir = data.wind.deg;
               this.isResultVisible = true;

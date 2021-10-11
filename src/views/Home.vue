@@ -1,24 +1,37 @@
 <template>
   <div>
-    <div id="home">
-      <div id="sidebar">
-        <router-link to="/radar">Radars</router-link><br/><br/>
-        <router-link to="/synop">IMGW Synop</router-link>
+    <section>
+      <div id="user">
+        <UserComponent />
       </div>
-      <div id="main">
-        <MainComponent/>
+    </section>
+    <section>
+      <div id="home">
+        <div id="sidebar">
+          <router-link to="/radar">
+            Radars
+          </router-link><br><br>
+          <router-link to="/synop">
+            IMGW Synop
+          </router-link>
+        </div>
+        <div id="main">
+          <MainComponent />
+        </div>
       </div>
-    </div>
+    </section>
   </div>
 </template>
 
 <script>
-import MainComponent from '@/components/MainComponent.vue';
+import MainComponent from '../components/Main.vue';
+import UserComponent from '../components/User.vue';
 
 export default {
   name: 'Home',
   components: {
     MainComponent,
+    UserComponent,
   },
 };
 </script>
@@ -26,6 +39,7 @@ export default {
 <style scoped>
 #home {
   display: flex;
+  padding-top: 5%;
 }
 #sidebar {
   border-right: 1px solid black;
@@ -38,8 +52,13 @@ export default {
   padding: 5px;
   flex: 80%;
 }
+#user {
+  height: 5vh;
+  border: none;
+  border-bottom: 1px solid black;
+}
 a {
-  color: rgb(51,51,51);
+  color: rgb(51, 51, 51);
   text-decoration-line: none;
 }
 a:hover {

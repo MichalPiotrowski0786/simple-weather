@@ -1,8 +1,10 @@
 <template>
   <div id="nav">
-    <h1><b><a href="/">Weather.in</a></b></h1>
+    <h1>
+      <b><a href="/">Weather.in</a></b>
+    </h1>
   </div>
-  <router-view/>
+  <router-view />
 </template>
 
 <style lang="scss">
@@ -20,7 +22,7 @@
   text-shadow: 1px 1px white;
 }
 a {
-  color: rgb(51,51,51);
+  color: rgb(51, 51, 51);
   text-decoration-line: none;
 }
 a:hover {

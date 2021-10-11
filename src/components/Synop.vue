@@ -1,13 +1,22 @@
 <template>
   <div>
-    <select id="synopInputWrapper" v-model='selected'>
-      <option v-for='item in arr' :key='item.id_stacji'>
+    <select
+      id="synopInputWrapper"
+      v-model="selected"
+    >
+      <option
+        v-for="item in arr"
+        :key="item.id_stacji"
+      >
         {{ item.stacja }}
       </option>
     </select>
-    <div id="resultWrapper" v-if='selected.length > 0'>
+    <div
+      v-if="selected.length > 0"
+      id="resultWrapper"
+    >
       <p>Date: {{ selectedEntry.data_pomiaru }}</p>
-      <p>Hour: {{ selectedEntry.godzina_pomiaru }}</p>
+      <p>Hour: {{ selectedEntry.godzina_pomiaru }} UTC</p>
       <p>Temperature: {{ selectedEntry.temperatura }} °C</p>
       <p>Wind speed: {{ selectedEntry.predkosc_wiatru }} m/s</p>
       <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}</p>
@@ -28,27 +37,22 @@ export default {
       selectedEntry: {},
     };
   },
-  mounted() {
-    this.getDataFromSynop();
-  },
   watch: {
     selected() {
-      this.arr.forEach(
-        (item) => {
-          if (item.stacja === this.selected) this.selectedEntry = item;
-        },
-      );
+      this.arr.forEach((item) => {
+        if (item.stacja === this.selected) this.selectedEntry = item;
+      });
     },
+  },
+  mounted() {
+    this.getDataFromSynop();
   },
   methods: {
     async getDataFromSynop() {
       const apiLink = 'https://danepubliczne.imgw.pl/api/data/synop/';
-      await fetch(
-        apiLink,
-        {
-          method: 'GET',
-        },
-      )
+      await fetch(apiLink, {
+        method: 'GET',
+      })
         .then((res) => {
           res
             .json()
