@@ -1,24 +1,14 @@
-# simple-weather
+# Simple Weather
 
-## Project setup
-```
-npm install
-```
+## As name says, simple weather website, allowing you to find current weather in most of the cities in the world, look up current weather situation on radars and check professional weather raports(currently only for Poland[IMGW])
 
-### Compiles and hot-reloads for development
-```
-npm run serve
-```
-
-### Compiles and minifies for production
-```
-npm run build
-```
-
-### Lints and fixes files
-```
-npm run lint
-```
-
-### Customize configuration
-See [Configuration Reference](https://cli.vuejs.org/config/).
+<p align="center">
+  <kbd>
+    <img src="/src/assets/0.png?raw=true">
+  </kbd>
+</p>
+<p align="center">
+  <kbd>
+    <img src="/src/assets/1.png?raw=true">
+  </kbd>
+</p>
