@@ -3,6 +3,7 @@ import Home from '../views/Home.vue';
 import Radar from '../components/Radar.vue';
 import Synop from '../components/Synop.vue';
 import User from '../components/User.vue';
+import Wxmap from '../components/Wxmap.vue';
 
 const routes = [
   {
@@ -24,6 +25,11 @@ const routes = [
     path: '/user',
     name: 'User',
     component: User,
+  },
+  {
+    path: '/wxmap',
+    name: 'Wxmap',
+    component: Wxmap,
   },
 ];
 

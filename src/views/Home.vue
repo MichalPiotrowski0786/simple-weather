@@ -13,6 +13,9 @@
           </router-link><br><br>
           <router-link to="/synop">
             IMGW Synop
+          </router-link><br><br>
+          <router-link to="/wxmap">
+            Wx Map
           </router-link>
         </div>
         <div id="main">
