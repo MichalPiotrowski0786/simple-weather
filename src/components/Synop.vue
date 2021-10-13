@@ -12,14 +12,14 @@
       </option>
     </select>
     <div
-      v-if="selected.length > 0"
+      v-if="!!selected"
       id="resultWrapper"
     >
       <p>Date: {{ selectedEntry.data_pomiaru }}</p>
       <p>Hour: {{ selectedEntry.godzina_pomiaru }} UTC</p>
       <p>Temperature: {{ selectedEntry.temperatura }} °C</p>
       <p>Wind speed: {{ selectedEntry.predkosc_wiatru }} m/s</p>
-      <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}</p>
+      <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}°</p>
       <p>Relative humidity: {{ selectedEntry.wilgotnosc_wzgledna }}%</p>
       <p>Accumulated rainfall: {{ selectedEntry.suma_opadu }} mm</p>
       <p>Pressure: {{ selectedEntry.cisnienie }} hpa</p>

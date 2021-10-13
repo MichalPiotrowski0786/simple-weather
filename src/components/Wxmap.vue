@@ -1,6 +1,9 @@
 <template>
-  <div>
-    Hello, map!
+  <div id="mapdiv">
+    <img
+      id="imgdiv"
+      src="../assets/map/poland.jpg"
+    >
   </div>
 </template>
 
@@ -11,5 +14,12 @@ export default {
 </script>
 
 <style>
-
+#mapdiv {
+  padding: 0;
+  margin: 0;
+}
+#imgdiv {
+  border: 5px solid black;
+  border-radius: 10px;
+}
 </style>
