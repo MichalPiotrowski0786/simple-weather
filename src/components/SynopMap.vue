@@ -7,7 +7,7 @@ import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 
 export default {
-  name: 'Wxmap',
+  name: 'SynopMap',
   data() {
     return {
       mapObject: null, // init leaflet map variable as null(no need for using prototype), used in this component
