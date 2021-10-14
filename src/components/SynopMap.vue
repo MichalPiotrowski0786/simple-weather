@@ -62,7 +62,6 @@ export default {
       const lon = currentCity[0].Longitude; // longitude variable for current station
 
       const marker = new L.Marker([lat, lon], { opacity: 0.0 }); // leaflet marker variable, opacity may be set to zero
-
       let tooltipClassName = 'tooltipClass';
       if (station.temperatura < 0) tooltipClassName = 'tooltipClassCold';
       marker.bindTooltip(`${station.temperatura} °C`, { // add celcius value to marker's tooltip
@@ -70,9 +69,7 @@ export default {
         direction: 'center', // center tooltip
         className: tooltipClassName,
         opacity: 1,
-      });
-
-      marker.addTo(this.mapObject); // add marker object to map
+      }).addTo(this.mapObject);
     },
     remap(value, inmin, inmax, outmin, outmax) {
       return ((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin;
