@@ -18,11 +18,11 @@
       <p>Date: {{ selectedEntry.data_pomiaru }}</p>
       <p>Hour: {{ selectedEntry.godzina_pomiaru }} UTC</p>
       <p>Temperature: {{ selectedEntry.temperatura }} °C</p>
-      <p>Wind speed: {{ selectedEntry.predkosc_wiatru }} m/s</p>
-      <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}°</p>
       <p>Relative humidity: {{ selectedEntry.wilgotnosc_wzgledna }}%</p>
-      <p>Accumulated rainfall: {{ selectedEntry.suma_opadu }} mm</p>
       <p>Pressure: {{ selectedEntry.cisnienie }} hpa</p>
+      <p>Wind speed: {{ selectedEntry.predkosc_wiatru }} km/h</p>
+      <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}°</p>
+      <p>Accumulated rainfall: {{ selectedEntry.suma_opadu }} mm</p>
     </div>
   </div>
 </template>
@@ -40,7 +40,10 @@ export default {
   watch: {
     selected() {
       this.arr.forEach((item) => {
-        if (item.stacja === this.selected) this.selectedEntry = item;
+        if (item.stacja === this.selected) {
+          this.selectedEntry = item;
+          this.selectedEntry.predkosc_wiatru = this.calculateWindInKPH(this.selectedEntry.predkosc_wiatru);
+        }
       });
     },
   },
@@ -58,10 +61,15 @@ export default {
             .json()
             .then((data) => {
               this.arr = data;
+              console.log(this.arr);
             })
             .catch((err) => console.log(err));
         })
         .catch((err) => console.log(err));
+    },
+    calculateWindInKPH(result) {
+      const output = result * 3.6;
+      return output.toFixed(2);
     },
   },
 };

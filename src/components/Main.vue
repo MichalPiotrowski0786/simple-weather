@@ -18,11 +18,11 @@
     >
       <p>Location: {{ city }}, {{ country }}</p>
       <p>Temperature: {{ temperature }} °C</p>
-      <p>Pressure: {{ pressure }} hpa</p>
       <p>Humidity: {{ humidity }}%</p>
+      <p>Pressure: {{ pressure }} hpa</p>
       <p>Wind Speed: {{ wind_speed }}</p>
       <p>Wind Gust: {{ wind_gust }}</p>
-      <p>Wind Direction: {{ wind_dir }}</p>
+      <p>Wind Direction: {{ wind_dir }}°</p>
     </div>
   </div>
 </template>
@@ -56,6 +56,7 @@ export default {
           res
             .json()
             .then((data) => {
+              console.log(data);
               this.city = data.name;
               this.country = data.sys.country;
               this.temperature = data.main.temp;
