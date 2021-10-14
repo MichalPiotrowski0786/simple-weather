@@ -5,6 +5,7 @@
 <script>
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
+import * as jsonData from '../assets/data.json';
 
 export default {
   name: 'SynopMap',
@@ -15,11 +16,27 @@ export default {
   },
   mounted() {
     this.mountLeafletMap();
+    this.getDataFromSynop();
   },
   beforeDestroy() {
     this.removeLeafletMapFromMemory();
   },
   methods: {
+    async getDataFromSynop() {
+      const apiLink = 'https://danepubliczne.imgw.pl/api/data/synop/';
+      await fetch(apiLink, {
+        method: 'GET',
+      })
+        .then((res) => {
+          res
+            .json()
+            .then((data) => {
+              if (this.mapObject) this.AddStations(data);
+            })
+            .catch((err) => console.log(err));
+        })
+        .catch((err) => console.log(err));
+    },
     mountLeafletMap() {
       this.mapObject = L.map('mapContainer', {
         minZoom: 5,
@@ -28,30 +45,33 @@ export default {
       this.mapObject.setView([52.2324042317635, 21.008814032139522], 6); // set initial view to center of Warsaw, with default zoom as 6
 
       L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png').addTo(this.mapObject); // add map display to map object(without this the map is empty)
-      const debugArr = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15]; // initialize simple debug array
-      this.DebugAddStations(debugArr); // add debug random stations
     },
     removeLeafletMapFromMemory() {
       if (this.mapObject) {
         this.mapObject.remove(); // if map was initialized, remove it when leaving this page(idk if this is necessary)
       }
     },
-    DebugAddStations(arr) {
+    AddStations(arr) {
       if (arr && arr.length > 0) {
-        arr.forEach((e) => this.DebugStationFactory(e)); // for every entry in array call DebugStationFactory to add marker to map
+        arr.forEach((e) => this.StationFactory(e)); // for every entry in array call DebugStationFactory to add marker to map
       }
     },
-    DebugStationFactory(value) {
-      let lat = Math.random(); // random 0-1 latitude
-      lat = this.remap(lat, 0, 1, 48.5, 55.0); // remap latitude from 0-1 to 48.5-55.5
-      let lon = Math.random(); // random 0-1 longtitude
-      lon = this.remap(lon, 0, 1, 14.0, 24.5);// remap longtitude from 0-1 to 14.0-24.5
+    StationFactory(station) {
+      const currentCity = jsonData.filter((e) => (e.Name === station.stacja)); // get current station from json file to use lat and lon
+      const lat = currentCity[0].Latitude; // latitude variable for current station
+      const lon = currentCity[0].Longitude; // longitude variable for current station
 
       const marker = new L.Marker([lat, lon], { opacity: 0.0 }); // leaflet marker variable, opacity may be set to zero
-      marker.bindTooltip(`${value} °C`, { // add celcius value to marker's tooltip
+
+      let tooltipClassName = 'tooltipClass';
+      if (station.temperatura < 0) tooltipClassName = 'tooltipClassCold';
+      marker.bindTooltip(`${station.temperatura} °C`, { // add celcius value to marker's tooltip
         permanent: true, // always display
         direction: 'center', // center tooltip
+        className: tooltipClassName,
+        opacity: 1,
       });
+
       marker.addTo(this.mapObject); // add marker object to map
     },
     remap(value, inmin, inmax, outmin, outmax) {
