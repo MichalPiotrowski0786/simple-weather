@@ -1,4 +1,14 @@
 <template>
+  <div id="selectorContainer">
+    <select id="selector">
+      <option value="temp">
+        Temperature
+      </option>
+      <option value="press">
+        Pressure
+      </option>
+    </select>
+  </div>
   <div id="mapContainer" />
 </template>
 
@@ -62,14 +72,41 @@ export default {
       const lon = currentCity[0].Longitude; // longitude variable for current station
 
       const marker = new L.Marker([lat, lon], { opacity: 0.0 }); // leaflet marker variable, opacity may be set to zero
-      let tooltipClassName = 'tooltipClass';
-      if (station.temperatura < 0) tooltipClassName = 'tooltipClassCold';
-      marker.bindTooltip(`${station.temperatura} °C`, { // add celcius value to marker's tooltip
+      this.selectMarkerMode(0, marker, station);
+    },
+    selectMarkerMode(mode, marker, station) {
+      let value = null;
+      let tooltipClass = null;
+      if (mode === 0) {
+        [value, tooltipClass] = this.temperatureMode(station.temperatura);
+      } else if (mode === 1) {
+        [value, tooltipClass] = this.pressureMode(station.cisnienie);
+      }
+      marker.bindTooltip(value, { // add value to marker's tooltip
         permanent: true, // always display
         direction: 'center', // center tooltip
-        className: tooltipClassName,
+        className: tooltipClass,
         opacity: 1,
       }).addTo(this.mapObject);
+    },
+    temperatureMode(temperature) {
+      const v = Math.round(Math.abs(temperature));
+      let prefix = '';
+      if (temperature < 0) prefix = 'Sub';
+      else prefix = 'Over';
+      const cssName = `tooltipClass ${prefix}${v}`;
+
+      return [`${temperature} °C`, cssName];
+    },
+    pressureMode(pressure) {
+      let v = Math.round(Math.abs(pressure));
+      v = this.remap(v, 950, 1050, 0, 40);
+      let prefix = '';
+      if (pressure < 1023) prefix = 'Sub';
+      else prefix = 'Over';
+      const cssName = `tooltipClass ${prefix}${v}`;
+
+      return [`${pressure} hpa`, cssName];
     },
     remap(value, inmin, inmax, outmin, outmax) {
       return ((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin;
@@ -83,8 +120,19 @@ export default {
 #mapContainer {
   margin: auto;
   width: 80vw;
-  height: 80vh;
+  height: 70vh;
   border: 5px solid black;
   border-radius: 10px;
+}
+#selectorContainer {
+  padding: 1vw;
+}
+#selector {
+  font-size: 30px;
+  background: none;
+  outline: none;
+  border: none;
+  border-bottom: 2px solid black;
+  margin-top: 20px;
 }
 </style>
