@@ -1,6 +1,9 @@
 <template>
   <div id="selectorContainer">
-    <select id="selector">
+    <select
+      id="selector"
+      @change="GetSelectorIndex($event.target.selectedIndex)"
+    >
       <option value="temp">
         Temperature
       </option>
@@ -22,6 +25,7 @@ export default {
   data() {
     return {
       mapObject: null, // init leaflet map variable as null(no need for using prototype), used in this component
+      selectorIndex: null,
     };
   },
   mounted() {
@@ -60,6 +64,9 @@ export default {
       if (this.mapObject) {
         this.mapObject.remove(); // if map was initialized, remove it when leaving this page(idk if this is necessary)
       }
+    },
+    GetSelectorIndex(index) {
+      this.selectorIndex = index;
     },
     AddStations(arr) {
       if (arr && arr.length > 0) {

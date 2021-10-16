@@ -2,7 +2,7 @@
   <div>
     <select
       id="synopInputWrapper"
-      v-model="selected"
+      v-model="selectedItem"
     >
       <option
         v-for="item in arr"
@@ -38,7 +38,7 @@ export default {
     };
   },
   watch: {
-    selected() {
+    selectedItem() {
       this.arr.forEach((item) => {
         if (item.stacja === this.selected) {
           this.selectedEntry = item;
