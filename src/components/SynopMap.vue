@@ -102,23 +102,23 @@ export default {
     },
     updateTooltipContent(index) {
       const inputIndex = Number(index);
-      let loopIndex = 0;
+      let loopIndex = 0; // variable used to make unique values for each marker(tooltip)
       this.markers.forEach((marker) => {
         // clean previous styling elements
-        // referenced by style id, then simply removing it after data was changed, simple and works
+        // referencing style by id, then simply removing it after data was changed, simple and works
         // StackOverflow answer for this idea: https://stackoverflow.com/a/3797236
 
         const styles = document.getElementById(`tooltip-style${loopIndex}`);
         if (styles !== null) styles.parentNode.removeChild(styles); // remove these styles
 
-        // remove tooltip to prevent stacking of multiple tooltips
+        // remove tooltip to prevent stacking multiple tooltips in one place
         marker.unbindTooltip();
 
         let dataValue = this.stations[loopIndex];
         let dataValueString = '';
 
         // remap every value to hue representation, using common sense for this(example: pressure of 100 hpa is impossible)
-        // refactor this later, this is horrible
+        // refactor this later
         if (inputIndex === 0) {
           // temperature
           const tempValue = dataValue.temperatura;
@@ -142,7 +142,9 @@ export default {
           const tempValue = dataValue.suma_opadu;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} mm`);
 
-          dataValue = this.remap(tempValue, 0, 100, 170, 300);
+          dataValue = this.remap(tempValue, 0.0, 100.0, 0.0, 1.0); // use exponential for better scale (non-linear)
+          dataValue = Math.sqrt(dataValue);
+          dataValue = this.remap(dataValue, 0, 1, 60, 240);
         } else if (inputIndex === 4) {
           // wind speed
           const tempValue = dataValue.predkosc_wiatru;
@@ -156,10 +158,10 @@ export default {
 
         if (dataValueString !== '-') {
           const style = document.createElement('style'); // this part is stupid or genius
-          style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data
+          style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data type
           style.lang = 'text/css';
           // dynamically generate css class to make custom color for tooltip
-          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${dataValue}, 100%, 50%); }`;
+          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${Math.trunc(dataValue)}, 100%, 50%); }`;
           document.getElementsByTagName('head')[0].appendChild(style);
 
           const tooltip = L.tooltip({ direction: 'center', permanent: true, className: `overall tooltipStylingClass${loopIndex}` });
@@ -170,7 +172,7 @@ export default {
       });
     },
     remap(value, inmin, inmax, outmin, outmax) {
-      return Math.trunc(((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin);
+      return ((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin;
       // remap values from one range to other, very usefull. TODO: make this function global for future possible use!
     },
   },
