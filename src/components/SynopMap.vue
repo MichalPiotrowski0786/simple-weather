@@ -1,14 +1,8 @@
 <template>
   <div id="selectorContainer">
-    <select
-      id="selector"
-      @change="GetSelectorIndex($event.target.selectedIndex)"
-    >
-      <option value="temp">
-        Temperature
-      </option>
-      <option value="press">
-        Pressure
+    <select id="selector" v-model="selectedOption">
+      <option v-for="option in selectorOptions" :key="option.value" :value="option.value">
+        {{ option.text }}
       </option>
     </select>
   </div>
@@ -17,6 +11,7 @@
 
 <script>
 import 'leaflet/dist/leaflet.css';
+import '../assets/colormap.css';
 import L from 'leaflet';
 import * as jsonData from '../assets/data.json';
 
@@ -24,9 +19,25 @@ export default {
   name: 'SynopMap',
   data() {
     return {
-      mapObject: null, // init leaflet map variable as null(no need for using prototype), used in this component
-      selectorIndex: null,
+      mapObject: null,
+      selectorOptions: [
+        { text: 'Temperature', value: '0' },
+        { text: 'Pressure', value: '1' },
+        { text: 'Humidity', value: '2' },
+        { text: 'Rainfall', value: '3' },
+        { text: 'Wind', value: '4' },
+      ],
+      markers: [],
+      layer: [],
+      coords: [],
+      stations: [],
+      selectedOption: '0',
     };
+  },
+  watch: {
+    selectedOption() {
+      if (this.mapObject != null) this.updateTooltipContent(this.selectedOption);
+    },
   },
   mounted() {
     this.mountLeafletMap();
@@ -45,7 +56,7 @@ export default {
           res
             .json()
             .then((data) => {
-              if (this.mapObject) this.AddStations(data);
+              if (this.mapObject != null) this.StationFactory(data);
             })
             .catch((err) => console.log(err));
         })
@@ -65,58 +76,101 @@ export default {
         this.mapObject.remove(); // if map was initialized, remove it when leaving this page(idk if this is necessary)
       }
     },
-    GetSelectorIndex(index) {
-      this.selectorIndex = index;
-    },
-    AddStations(arr) {
-      if (arr && arr.length > 0) {
-        arr.forEach((e) => this.StationFactory(e)); // for every entry in array call DebugStationFactory to add marker to map
+    StationFactory(data) {
+      if (data != null && data.length > 0) {
+        data.forEach((imgwStationRes) => {
+          const coordinates = jsonData.filter((city) => (city.Name === imgwStationRes.stacja))[0]; // get current station from json file to use lat and lon
+
+          this.coords.push(coordinates);
+          this.stations.push(imgwStationRes);
+        });
+
+        this.markers = this.onCreateMarkers();
+        this.updateTooltipContent('0');
       }
     },
-    StationFactory(station) {
-      const currentCity = jsonData.filter((e) => (e.Name === station.stacja)); // get current station from json file to use lat and lon
-      const lat = currentCity[0].Latitude; // latitude variable for current station
-      const lon = currentCity[0].Longitude; // longitude variable for current station
+    onCreateMarkers() {
+      if (this.coords == null || this.coords.length === 0) return null;
 
-      const marker = new L.Marker([lat, lon], { opacity: 0.0 }); // leaflet marker variable, opacity may be set to zero
-      this.selectMarkerMode(0, marker, station);
-    },
-    selectMarkerMode(mode, marker, station) {
-      let value = null;
-      let tooltipClass = null;
-      if (mode === 0) {
-        [value, tooltipClass] = this.temperatureMode(station.temperatura);
-      } else if (mode === 1) {
-        [value, tooltipClass] = this.pressureMode(station.cisnienie);
-      }
-      marker.bindTooltip(value, { // add value to marker's tooltip
-        permanent: true, // always display
-        direction: 'center', // center tooltip
-        className: tooltipClass,
-        opacity: 1,
-      }).addTo(this.mapObject);
-    },
-    temperatureMode(temperature) {
-      const v = Math.round(Math.abs(temperature));
-      let prefix = '';
-      if (temperature < 0) prefix = 'Sub';
-      else prefix = 'Over';
-      const cssName = `tooltipClass ${prefix}${v}`;
+      const temp = [];
+      this.coords.forEach((item) => {
+        const marker = L.marker([item.Latitude, item.Longitude], { opacity: 0.0 }).addTo(this.mapObject);
+        temp.push(marker);
+      });
 
-      return [`${temperature} °C`, cssName];
+      return temp;
     },
-    pressureMode(pressure) {
-      let v = Math.round(Math.abs(pressure));
-      v = this.remap(v, 950, 1050, 0, 40);
-      let prefix = '';
-      if (pressure < 1023) prefix = 'Sub';
-      else prefix = 'Over';
-      const cssName = `tooltipClass ${prefix}${v}`;
+    updateTooltipContent(index) {
+      const inputIndex = Number(index);
+      let loopIndex = 0;
+      this.markers.forEach((marker) => {
+        // clean previous styling elements
+        // referenced by style id, then simply removing it after data was changed, simple and works
+        // StackOverflow answer for this idea: https://stackoverflow.com/a/3797236
 
-      return [`${pressure} hpa`, cssName];
+        const styles = document.getElementById(`tooltip-style${loopIndex}`);
+        if (styles !== null) styles.parentNode.removeChild(styles); // remove these styles
+
+        // remove tooltip to prevent stacking of multiple tooltips
+        marker.unbindTooltip();
+
+        let dataValue = this.stations[loopIndex];
+        let dataValueString = '';
+
+        // remap every value to hue representation, using common sense for this(example: pressure of 100 hpa is impossible)
+        // refactor this later, this is horrible
+        if (inputIndex === 0) {
+          // temperature
+          const tempValue = dataValue.temperatura;
+          dataValueString = ((tempValue === null) ? '-' : `${tempValue} °C`);
+
+          dataValue = 300 - this.remap(tempValue, -20, 40, 0, 300);
+        } else if (inputIndex === 1) {
+          // pressure
+          const tempValue = dataValue.cisnienie;
+          dataValueString = ((tempValue === null) ? '-' : `${tempValue} hpa`);
+
+          dataValue = 300 - this.remap(tempValue, 950, 1050, 0, 300);
+        } else if (inputIndex === 2) {
+          // humidity
+          const tempValue = dataValue.wilgotnosc_wzgledna;
+          dataValueString = ((tempValue === null) ? '-' : `${tempValue}%`);
+
+          dataValue = this.remap(tempValue, 0, 100, 50, 240);
+        } else if (inputIndex === 3) {
+          // rainfall
+          const tempValue = dataValue.suma_opadu;
+          dataValueString = ((tempValue === null) ? '-' : `${tempValue} mm`);
+
+          dataValue = this.remap(tempValue, 0, 100, 170, 300);
+        } else if (inputIndex === 4) {
+          // wind speed
+          const tempValue = dataValue.predkosc_wiatru;
+          dataValueString = ((tempValue === null) ? '-' : `${tempValue} m/s`);
+
+          dataValue = this.remap(dataValue.predkosc_wiatru, 0, 50, 170, 300);
+        } else {
+          dataValueString = `${dataValue.id_stacji}`;
+          dataValue = 330;
+        }
+
+        if (dataValueString !== '-') {
+          const style = document.createElement('style'); // this part is stupid or genius
+          style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data
+          style.lang = 'text/css';
+          // dynamically generate css class to make custom color for tooltip
+          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${dataValue}, 100%, 50%); }`;
+          document.getElementsByTagName('head')[0].appendChild(style);
+
+          const tooltip = L.tooltip({ direction: 'center', permanent: true, className: `overall tooltipStylingClass${loopIndex}` });
+          tooltip.setContent(dataValueString);
+          marker.bindTooltip(tooltip);
+        }
+        loopIndex += 1;
+      });
     },
     remap(value, inmin, inmax, outmin, outmax) {
-      return ((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin;
+      return Math.trunc(((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin);
       // remap values from one range to other, very usefull. TODO: make this function global for future possible use!
     },
   },

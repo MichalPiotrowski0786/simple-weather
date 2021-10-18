@@ -1,20 +1,11 @@
 <template>
   <div>
-    <select
-      id="synopInputWrapper"
-      v-model="selectedItem"
-    >
-      <option
-        v-for="item in arr"
-        :key="item.id_stacji"
-      >
+    <select id="synopInputWrapper" v-model="selected">
+      <option v-for="item in arr" :key="item.id_stacji">
         {{ item.stacja }}
       </option>
     </select>
-    <div
-      v-if="!!selected"
-      id="resultWrapper"
-    >
+    <div v-if="!!selected" id="resultWrapper">
       <p>Date: {{ selectedEntry.data_pomiaru }}</p>
       <p>Hour: {{ selectedEntry.godzina_pomiaru }} UTC</p>
       <p>Temperature: {{ selectedEntry.temperatura }} °C</p>
@@ -38,7 +29,7 @@ export default {
     };
   },
   watch: {
-    selectedItem() {
+    selected() {
       this.arr.forEach((item) => {
         if (item.stacja === this.selected) {
           this.selectedEntry = item;

@@ -42,6 +42,12 @@
         "max-len": [
             "error",
             { "code": 999 }
-        ]
+        ],
+        "vue/max-attributes-per-line": ["error", {
+            "singleline": {
+                "max": 5,
+                "allowFirstLine": true
+            }
+        }]
     }
 }
