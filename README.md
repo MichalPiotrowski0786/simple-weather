@@ -6,11 +6,16 @@
 
 <p align="center">
   <kbd>
-    <img src="/src/assets/0.png?raw=true">
+    <img src="/src/assets/0.png">
   </kbd>
 </p>
 <p align="center">
   <kbd>
-    <img src="/src/assets/1.png?raw=true">
+    <img src="/src/assets/1.png">
+  </kbd>
+</p>
+<p align="center">
+  <kbd>
+    <img src="/src/assets/synopmap.png">
   </kbd>
 </p>
