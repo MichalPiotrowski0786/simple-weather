@@ -1,6 +1,5 @@
 .overall {
-  font-weight: bold;
   border: none;
-  color: #fff;
-  text-shadow: -1px -1px 0 #000, 1px -1px 0 #000, -1px 1px 0 #000, 1px 1px 0 #000;
+  color: #000;
+  /* -webkit-text-stroke: 2px black; */
 }

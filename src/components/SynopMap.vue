@@ -114,48 +114,49 @@ export default {
         // remove tooltip to prevent stacking multiple tooltips in one place
         marker.unbindTooltip();
 
-        let dataValue = this.stations[loopIndex];
+        const dataValue = this.stations[loopIndex];
         let dataValueString = '';
+        let tempValue;
 
         // remap every value to hue representation, using common sense for this(example: pressure of 100 hpa is impossible)
         // refactor this later
         if (inputIndex === 0) {
           // temperature
-          const tempValue = dataValue.temperatura;
+          tempValue = dataValue.temperatura;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} °C`);
 
-          dataValue = 300 - this.remap(tempValue, -20, 40, 0, 300);
+          tempValue = 300 - this.remap(tempValue, -20, 40, 0, 300);
         } else if (inputIndex === 1) {
           // pressure
-          const tempValue = dataValue.cisnienie;
+          tempValue = dataValue.cisnienie;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} hpa`);
 
-          dataValue = 300 - this.remap(tempValue, 970, 1030, 0, 300);
+          tempValue = 300 - this.remap(tempValue, 970, 1030, 0, 300);
         } else if (inputIndex === 2) {
           // humidity
-          const tempValue = dataValue.wilgotnosc_wzgledna;
+          tempValue = dataValue.wilgotnosc_wzgledna;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue}%`);
 
-          dataValue = this.remap(tempValue, 0, 100, 50, 240);
+          tempValue = this.remap(tempValue, 0, 100, 50, 240);
         } else if (inputIndex === 3) {
           // rainfall
-          const tempValue = dataValue.suma_opadu;
+          tempValue = dataValue.suma_opadu;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} mm`);
 
-          dataValue = this.remap(tempValue, 0.0, 100.0, 0.0, 1.0); // use exponential for better scale (non-linear)
-          dataValue = Math.sqrt(dataValue);
-          dataValue = this.remap(dataValue, 0, 1, 60, 240);
+          tempValue = this.remap(tempValue, 0.0, 100.0, 0.0, 1.0); // use exponential for better scale (non-linear)
+          tempValue = Math.sqrt(tempValue);
+          tempValue = this.remap(tempValue, 0, 1, 60, 240);
         } else if (inputIndex === 4) {
           // wind speed
-          const tempValue = dataValue.predkosc_wiatru;
+          tempValue = dataValue.predkosc_wiatru;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} m/s`);
 
-          dataValue = this.remap(tempValue, 0.0, 50.0, 0.0, 1.0); // use exponential for better scale (non-linear)
-          dataValue = Math.sqrt(dataValue);
-          dataValue = this.remap(dataValue, 0, 1, 150, 330);
+          tempValue = this.remap(tempValue, 0.0, 50.0, 0.0, 1.0); // use exponential for better scale (non-linear)
+          tempValue = Math.sqrt(tempValue);
+          tempValue = this.remap(tempValue, 0, 1, 150, 330);
         } else {
           dataValueString = `${dataValue.id_stacji}`;
-          dataValue = 330;
+          tempValue = 330;
         }
 
         if (dataValueString !== '-') {
@@ -163,11 +164,14 @@ export default {
           style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data type
           style.lang = 'text/css';
           // dynamically generate css class to make custom color for tooltip
-          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${Math.trunc(dataValue)}, 100%, 50%); }`;
+          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${Math.trunc(tempValue)}, 100%, 65%); }`;
           document.getElementsByTagName('head')[0].appendChild(style);
 
-          const tooltip = L.tooltip({ direction: 'center', permanent: true, className: `overall tooltipStylingClass${loopIndex}` });
-          tooltip.setContent(dataValueString);
+          const tooltip = L.tooltip({
+            direction: 'center', permanent: true, opacity: 1.0, className: `overall tooltipStylingClass${loopIndex}`,
+          });
+          // const stationTime = (dataValue.godzina_pomiaru === null) ? ' - ' : dataValue.godzina_pomiaru;
+          tooltip.setContent(`${dataValueString}`);
           marker.bindTooltip(tooltip);
         }
         loopIndex += 1;
