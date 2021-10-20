@@ -130,7 +130,7 @@ export default {
           const tempValue = dataValue.cisnienie;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} hpa`);
 
-          dataValue = 300 - this.remap(tempValue, 950, 1050, 0, 300);
+          dataValue = 300 - this.remap(tempValue, 970, 1030, 0, 300);
         } else if (inputIndex === 2) {
           // humidity
           const tempValue = dataValue.wilgotnosc_wzgledna;
@@ -150,7 +150,9 @@ export default {
           const tempValue = dataValue.predkosc_wiatru;
           dataValueString = ((tempValue === null) ? '-' : `${tempValue} m/s`);
 
-          dataValue = this.remap(dataValue.predkosc_wiatru, 0, 50, 170, 300);
+          dataValue = this.remap(tempValue, 0.0, 50.0, 0.0, 1.0); // use exponential for better scale (non-linear)
+          dataValue = Math.sqrt(dataValue);
+          dataValue = this.remap(dataValue, 0, 1, 150, 330);
         } else {
           dataValueString = `${dataValue.id_stacji}`;
           dataValue = 330;
