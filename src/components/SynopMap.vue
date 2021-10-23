@@ -79,12 +79,31 @@ export default {
         });
 
         await this.returnMultiplePromises(ids).then((res) => { stationsdata = res; });
-
+        // add markers, tooltips and style them
+        let loopIndex = 0;
         stationsdata.forEach((station) => {
+          if (loopIndex === 0) console.log(station);
           const marker = L.marker([station.lat, station.lon], { opacity: 0.0 }).addTo(this.mapObject);
-          const tooltip = L.tooltip({ direction: 'center', permanent: true, opacity: 1.0 });
-          tooltip.setContent(`${station.temperatureAutoRecords.slice(-1)[0].value}`);
+          const styles = document.getElementById(`tooltip-style${loopIndex}`);
+          if (styles !== null) styles.parentNode.removeChild(styles);
+
+          const rawValue = station.temperatureAutoRecords.slice(-1)[0].value;
+          const remappedRawValue = 300 - this.remap(rawValue, -30, 40, 0, 300);
+
+          const style = document.createElement('style'); // this part is stupid or genius
+          style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data type
+          style.lang = 'text/css';
+          // dynamically generate css class to make custom color for tooltip
+          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${Math.trunc(remappedRawValue)}, 100%, 65%); }`;
+          document.getElementsByTagName('head')[0].appendChild(style);
+
+          const tooltip = L.tooltip({
+            direction: 'center', permanent: true, opacity: 1.0, className: `overall tooltipStylingClass${loopIndex}`,
+          });
+          tooltip.setContent(`${rawValue} °C`);
           marker.bindTooltip(tooltip);
+
+          loopIndex += 1;
         });
       }
     },
@@ -102,7 +121,7 @@ export default {
             if (data.temperatureAutoRecords.length > 0
             && data.windVelocityTelRecords.length > 0
             && data.windMaxVelocityRecords.length > 0) {
-              const redata = data;// reassign data and add lat, lon. then push to output array
+              const redata = data; // reassign data and add lat, lon. then push to output array
               redata.lat = object.lat;
               redata.lon = object.lon;
 
