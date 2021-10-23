@@ -70,25 +70,50 @@ export default {
       }
     },
     async getMeasurements(data) {
-      const temp = [];
       if (data != null && data.length > 0) {
-        await data.forEach((station) => {
-          const apiLink = `https://hydro.imgw.pl/api/station/meteo/?id=${station.i}`;
-          fetch(apiLink, {
-            method: 'GET',
-          })
-            .then((res) => res.json())
-            .then((value) => {
-              if (value.temperatureAutoRecords.length > 0 && value.windMaxVelocityRecords.length > 0 && value.windVelocityTelRecords.length) {
-                console.log(value);
-                temp.push(value);
-              }
-            })
-            .catch((err) => console.log(err));
+        const ids = [];
+        let stationsdata = [];
+        data.forEach((location) => {
+          const json = { id: location.i, lat: location.la, lon: location.lo };
+          ids.push(json);
         });
 
-        console.log(temp);
+        await this.returnMultiplePromises(ids).then((res) => { stationsdata = res; });
+
+        stationsdata.forEach((station) => {
+          const marker = L.marker([station.lat, station.lon], { opacity: 0.0 }).addTo(this.mapObject);
+          const tooltip = L.tooltip({ direction: 'center', permanent: true, opacity: 1.0 });
+          tooltip.setContent(`${station.temperatureAutoRecords.slice(-1)[0].value}`);
+          marker.bindTooltip(tooltip);
+        });
       }
+    },
+    async returnMultiplePromises(objects) {
+      const requests = [];
+      const responses = [];
+
+      objects.forEach((object) => {
+        requests.push(fetch(`https://hydro.imgw.pl/api/station/meteo/?id=${object.id}`, {
+          method: 'GET',
+        })
+        // Add response to array
+          .then((response) => response.json())
+          .then((data) => {
+            if (data.temperatureAutoRecords.length > 0
+            && data.windVelocityTelRecords.length > 0
+            && data.windMaxVelocityRecords.length > 0) {
+              const redata = data;// reassign data and add lat, lon. then push to output array
+              redata.lat = object.lat;
+              redata.lon = object.lon;
+
+              responses.push(data);
+            }
+          })
+          .catch((err) => console.log(err)));
+      });
+
+      await Promise.all(requests); // Await all requests
+      return responses; // return all responses
     },
     // updateTooltipContent(index) {
     //   const inputIndex = Number(index);
