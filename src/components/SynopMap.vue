@@ -13,13 +13,13 @@
 import 'leaflet/dist/leaflet.css';
 import '../assets/colormap.css';
 import L from 'leaflet';
-import * as jsonData from '../assets/data.json';
 
 export default {
   name: 'SynopMap',
   data() {
     return {
       mapObject: null,
+      stations: [],
       selectorOptions: [
         { text: 'Temperature', value: '0' },
         { text: 'Pressure', value: '1' },
@@ -27,10 +27,7 @@ export default {
         { text: 'Rainfall', value: '3' },
         { text: 'Wind', value: '4' },
       ],
-      markers: [],
       layer: [],
-      coords: [],
-      stations: [],
       selectedOption: '0',
     };
   },
@@ -40,25 +37,21 @@ export default {
     },
   },
   mounted() {
+    this.getStations();
     this.mountLeafletMap();
-    this.getDataFromSynop();
   },
   beforeDestroy() {
     this.removeLeafletMapFromMemory();
   },
   methods: {
-    async getDataFromSynop() {
-      const apiLink = 'https://danepubliczne.imgw.pl/api/data/synop/';
+    async getStations() {
+      const apiLink = 'https://hydro.imgw.pl/api/map/?category=meteo';
       await fetch(apiLink, {
         method: 'GET',
       })
-        .then((res) => {
-          res
-            .json()
-            .then((data) => {
-              if (this.mapObject != null) this.StationFactory(data);
-            })
-            .catch((err) => console.log(err));
+        .then((res) => res.json())
+        .then((value) => {
+          this.getMeasurements(value);
         })
         .catch((err) => console.log(err));
     },
@@ -76,107 +69,104 @@ export default {
         this.mapObject.remove(); // if map was initialized, remove it when leaving this page(idk if this is necessary)
       }
     },
-    StationFactory(data) {
+    async getMeasurements(data) {
+      const temp = [];
       if (data != null && data.length > 0) {
-        data.forEach((imgwStationRes) => {
-          const coordinates = jsonData.filter((city) => (city.Name === imgwStationRes.stacja))[0]; // get current station from json file to use lat and lon
-
-          this.coords.push(coordinates);
-          this.stations.push(imgwStationRes);
+        await data.forEach((station) => {
+          const apiLink = `https://hydro.imgw.pl/api/station/meteo/?id=${station.i}`;
+          fetch(apiLink, {
+            method: 'GET',
+          })
+            .then((res) => res.json())
+            .then((value) => {
+              if (value.temperatureAutoRecords.length > 0 && value.windMaxVelocityRecords.length > 0 && value.windVelocityTelRecords.length) {
+                console.log(value);
+                temp.push(value);
+              }
+            })
+            .catch((err) => console.log(err));
         });
 
-        this.markers = this.onCreateMarkers();
-        this.updateTooltipContent('0');
+        console.log(temp);
       }
     },
-    onCreateMarkers() {
-      if (this.coords == null || this.coords.length === 0) return null;
+    // updateTooltipContent(index) {
+    //   const inputIndex = Number(index);
+    //   let loopIndex = 0; // variable used to make unique values for each marker(tooltip)
+    //   this.markers.forEach((marker) => {
+    //     // clean previous styling elements
+    //     // referencing style by id, then simply removing it after data was changed, simple and works
+    //     // StackOverflow answer for this idea: https://stackoverflow.com/a/3797236
 
-      const temp = [];
-      this.coords.forEach((item) => {
-        const marker = L.marker([item.Latitude, item.Longitude], { opacity: 0.0 }).addTo(this.mapObject);
-        temp.push(marker);
-      });
+    //     const styles = document.getElementById(`tooltip-style${loopIndex}`);
+    //     if (styles !== null) styles.parentNode.removeChild(styles); // remove these styles
 
-      return temp;
-    },
-    updateTooltipContent(index) {
-      const inputIndex = Number(index);
-      let loopIndex = 0; // variable used to make unique values for each marker(tooltip)
-      this.markers.forEach((marker) => {
-        // clean previous styling elements
-        // referencing style by id, then simply removing it after data was changed, simple and works
-        // StackOverflow answer for this idea: https://stackoverflow.com/a/3797236
+    //     // remove tooltip to prevent stacking multiple tooltips in one place
+    //     marker.unbindTooltip();
 
-        const styles = document.getElementById(`tooltip-style${loopIndex}`);
-        if (styles !== null) styles.parentNode.removeChild(styles); // remove these styles
+    //     const dataValue = this.stations[loopIndex];
+    //     let dataValueString = '';
+    //     let tempValue;
 
-        // remove tooltip to prevent stacking multiple tooltips in one place
-        marker.unbindTooltip();
+    //     // remap every value to hue representation, using common sense for this(example: pressure of 100 hpa is impossible)
+    //     // refactor this later
+    //     if (inputIndex === 0) {
+    //       // temperature
+    //       tempValue = dataValue.temperatura;
+    //       dataValueString = ((tempValue === null) ? '-' : `${tempValue} °C`);
 
-        const dataValue = this.stations[loopIndex];
-        let dataValueString = '';
-        let tempValue;
+    //       tempValue = 300 - this.remap(tempValue, -20, 40, 0, 300);
+    //     } else if (inputIndex === 1) {
+    //       // pressure
+    //       tempValue = dataValue.cisnienie;
+    //       dataValueString = ((tempValue === null) ? '-' : `${tempValue} hpa`);
 
-        // remap every value to hue representation, using common sense for this(example: pressure of 100 hpa is impossible)
-        // refactor this later
-        if (inputIndex === 0) {
-          // temperature
-          tempValue = dataValue.temperatura;
-          dataValueString = ((tempValue === null) ? '-' : `${tempValue} °C`);
+    //       tempValue = 300 - this.remap(tempValue, 970, 1030, 0, 300);
+    //     } else if (inputIndex === 2) {
+    //       // humidity
+    //       tempValue = dataValue.wilgotnosc_wzgledna;
+    //       dataValueString = ((tempValue === null) ? '-' : `${tempValue}%`);
 
-          tempValue = 300 - this.remap(tempValue, -20, 40, 0, 300);
-        } else if (inputIndex === 1) {
-          // pressure
-          tempValue = dataValue.cisnienie;
-          dataValueString = ((tempValue === null) ? '-' : `${tempValue} hpa`);
+    //       tempValue = this.remap(tempValue, 0, 100, 50, 240);
+    //     } else if (inputIndex === 3) {
+    //       // rainfall
+    //       tempValue = dataValue.suma_opadu;
+    //       dataValueString = ((tempValue === null) ? '-' : `${tempValue} mm`);
 
-          tempValue = 300 - this.remap(tempValue, 970, 1030, 0, 300);
-        } else if (inputIndex === 2) {
-          // humidity
-          tempValue = dataValue.wilgotnosc_wzgledna;
-          dataValueString = ((tempValue === null) ? '-' : `${tempValue}%`);
+    //       tempValue = this.remap(tempValue, 0.0, 100.0, 0.0, 1.0); // use exponential for better scale (non-linear)
+    //       tempValue = Math.sqrt(tempValue);
+    //       tempValue = this.remap(tempValue, 0, 1, 60, 240);
+    //     } else if (inputIndex === 4) {
+    //       // wind speed
+    //       tempValue = dataValue.predkosc_wiatru;
+    //       dataValueString = ((tempValue === null) ? '-' : `${tempValue} m/s`);
 
-          tempValue = this.remap(tempValue, 0, 100, 50, 240);
-        } else if (inputIndex === 3) {
-          // rainfall
-          tempValue = dataValue.suma_opadu;
-          dataValueString = ((tempValue === null) ? '-' : `${tempValue} mm`);
+    //       tempValue = this.remap(tempValue, 0.0, 50.0, 0.0, 1.0); // use exponential for better scale (non-linear)
+    //       tempValue = Math.sqrt(tempValue);
+    //       tempValue = this.remap(tempValue, 0, 1, 150, 330);
+    //     } else {
+    //       dataValueString = `${dataValue.id_stacji}`;
+    //       tempValue = 330;
+    //     }
 
-          tempValue = this.remap(tempValue, 0.0, 100.0, 0.0, 1.0); // use exponential for better scale (non-linear)
-          tempValue = Math.sqrt(tempValue);
-          tempValue = this.remap(tempValue, 0, 1, 60, 240);
-        } else if (inputIndex === 4) {
-          // wind speed
-          tempValue = dataValue.predkosc_wiatru;
-          dataValueString = ((tempValue === null) ? '-' : `${tempValue} m/s`);
+    //     if (dataValueString !== '-') {
+    //       const style = document.createElement('style'); // this part is stupid or genius
+    //       style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data type
+    //       style.lang = 'text/css';
+    //       // dynamically generate css class to make custom color for tooltip
+    //       style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${Math.trunc(tempValue)}, 100%, 65%); }`;
+    //       document.getElementsByTagName('head')[0].appendChild(style);
 
-          tempValue = this.remap(tempValue, 0.0, 50.0, 0.0, 1.0); // use exponential for better scale (non-linear)
-          tempValue = Math.sqrt(tempValue);
-          tempValue = this.remap(tempValue, 0, 1, 150, 330);
-        } else {
-          dataValueString = `${dataValue.id_stacji}`;
-          tempValue = 330;
-        }
-
-        if (dataValueString !== '-') {
-          const style = document.createElement('style'); // this part is stupid or genius
-          style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data type
-          style.lang = 'text/css';
-          // dynamically generate css class to make custom color for tooltip
-          style.innerHTML = `.tooltipStylingClass${loopIndex} { background-color: hsl(${Math.trunc(tempValue)}, 100%, 65%); }`;
-          document.getElementsByTagName('head')[0].appendChild(style);
-
-          const tooltip = L.tooltip({
-            direction: 'center', permanent: true, opacity: 1.0, className: `overall tooltipStylingClass${loopIndex}`,
-          });
-          // const stationTime = (dataValue.godzina_pomiaru === null) ? ' - ' : dataValue.godzina_pomiaru;
-          tooltip.setContent(`${dataValueString}`);
-          marker.bindTooltip(tooltip);
-        }
-        loopIndex += 1;
-      });
-    },
+    //       const tooltip = L.tooltip({
+    //         direction: 'center', permanent: true, opacity: 1.0, className: `overall tooltipStylingClass${loopIndex}`,
+    //       });
+    //       // const stationTime = (dataValue.godzina_pomiaru === null) ? ' - ' : dataValue.godzina_pomiaru;
+    //       tooltip.setContent(`${dataValueString}`);
+    //       marker.bindTooltip(tooltip);
+    //     }
+    //     loopIndex += 1;
+    //   });
+    // },
     remap(value, inmin, inmax, outmin, outmax) {
       return ((value - inmin) * (outmax - outmin)) / (inmax - inmin) + outmin;
       // remap values from one range to other, very usefull. TODO: make this function global for future possible use!
@@ -185,16 +175,13 @@ export default {
 };
 </script>
 
-<style scoped>
+<style lang="scss" scoped>
 #mapContainer {
   margin: auto;
   width: 80vw;
   height: 70vh;
   border: 5px solid black;
   border-radius: 10px;
-}
-#selectorContainer {
-  padding: 1vw;
 }
 #selector {
   font-size: 30px;
@@ -203,5 +190,8 @@ export default {
   border: none;
   border-bottom: 2px solid black;
   margin-top: 20px;
+  &Container {
+    padding: 1vw;
+  }
 }
 </style>

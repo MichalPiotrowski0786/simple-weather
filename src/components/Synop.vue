@@ -1,20 +1,20 @@
 <template>
-  <div>
-    <select id="synopInputWrapper" v-model="selected">
+  <div class="synop-content">
+    <select v-model="selected" class="synop-selector">
       <option v-for="item in arr" :key="item.id_stacji">
         {{ item.stacja }}
       </option>
     </select>
-    <div v-if="!!selected" id="resultWrapper">
-      <p>Date: {{ selectedEntry.data_pomiaru }}</p>
-      <p>Hour: {{ selectedEntry.godzina_pomiaru }} UTC</p>
-      <p>Temperature: {{ selectedEntry.temperatura }} °C</p>
-      <p>Relative humidity: {{ selectedEntry.wilgotnosc_wzgledna }}%</p>
-      <p>Pressure: {{ selectedEntry.cisnienie }} hpa</p>
-      <p>Wind speed: {{ selectedEntry.predkosc_wiatru }} km/h</p>
-      <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}°</p>
-      <p>Accumulated rainfall: {{ selectedEntry.suma_opadu }} mm</p>
-    </div>
+  </div>
+  <div v-if="!!selected" class="synop-data">
+    <p>Date: {{ selectedEntry.data_pomiaru }}</p>
+    <p>Hour: {{ selectedEntry.godzina_pomiaru }} UTC</p>
+    <p>Temperature: {{ selectedEntry.temperatura }} °C</p>
+    <p>Relative humidity: {{ selectedEntry.wilgotnosc_wzgledna }}%</p>
+    <p>Pressure: {{ selectedEntry.cisnienie }} hpa</p>
+    <p>Wind speed: {{ selectedEntry.predkosc_wiatru }} km/h</p>
+    <p>Wind direction: {{ selectedEntry.kierunek_wiatru }}°</p>
+    <p>Accumulated rainfall: {{ selectedEntry.suma_opadu }} mm</p>
   </div>
 </template>
 
@@ -67,12 +67,23 @@ export default {
 </script>
 
 <style scoped>
-#synopInputWrapper {
-  font-size: 30px;
-  background: none;
-  outline: none;
+.synop-content {
+  display: flex;
+  justify-content: center;
+}
+.synop-selector {
+  width: 50%;
+  height: 40px;
+  margin: 80px 0px 40px 0px;
+  font-size: 25px;
+  text-align: center;
   border: none;
   border-bottom: 2px solid black;
-  margin-top: 20px;
+  background: none;
+  outline: none;
+}
+.synop-data {
+  margin: 40px 0px 40px 0px;
+  font-size: 25px;
 }
 </style>
