@@ -1,4 +1,7 @@
 <template>
+  <div v-if="!isLoaded" class="loadercontent">
+    <img src="https://ems.medico.com.bd/css/spinner.gif" class="loader">
+  </div>
   <div id="selectorContainer">
     <select id="selector" v-model="selectedOption">
       <option v-for="option in selectorOptions" :key="option.value" :value="option.value">
@@ -31,6 +34,7 @@ export default {
       ],
       layer: [],
       selectedOption: '0',
+      isLoaded: false,
     };
   },
   watch: {
@@ -65,6 +69,7 @@ export default {
         let stationsdata = [];
 
         await this.returnMultiplePromises(datafile).then((res) => { stationsdata = res; });
+        this.isLoaded = true; // when content is loaded disable spinner
         // add markers, tooltips and style them
         let loopIndex = 0;
         stationsdata.forEach((station) => {
@@ -145,5 +150,21 @@ export default {
   &Container {
     padding: 1vw;
   }
+}
+.loader {
+  width: 200px;
+  height: 200px;
+}
+.loadercontent {
+  position: fixed;
+  z-index: 999;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.8);
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
 </style>
