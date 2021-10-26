@@ -27,10 +27,7 @@ export default {
       stations: [],
       selectorOptions: [
         { text: 'Temperature', value: '0' },
-        { text: 'Pressure', value: '1' },
-        { text: 'Humidity', value: '2' },
-        { text: 'Rainfall', value: '3' },
-        { text: 'Wind', value: '4' },
+        { text: 'Gusts', value: '1' },
       ],
       layer: [],
       selectedOption: '0',
@@ -43,7 +40,7 @@ export default {
     },
   },
   mounted() {
-    this.getMeasurements();
+    this.getMeasurements(1);
     this.mountLeafletMap();
   },
   beforeDestroy() {
@@ -64,7 +61,7 @@ export default {
         this.mapObject.remove(); // if map was initialized, remove it when leaving this page(idk if this is necessary)
       }
     },
-    async getMeasurements() {
+    async getMeasurements(type) {
       if (datafile != null && datafile.length > 0) {
         let stationsdata = [];
 
@@ -77,8 +74,24 @@ export default {
           const styles = document.getElementById(`tooltip-style${loopIndex}`);
           if (styles !== null) styles.parentNode.removeChild(styles);
 
-          const rawValue = station.temperatureAutoRecords.slice(-1)[0].value;
-          const remappedRawValue = 300 - this.remap(rawValue, -30, 40, 0, 300);
+          let rawValue = 0;
+          let remappedRawValue = 0;
+          switch (type) {
+          default:
+            rawValue = 0;
+            remappedRawValue = 0;
+            break;
+          case 0:
+            rawValue = station.temperatureAutoRecords.slice(-1)[0].value;
+            remappedRawValue = 300 - this.remap(rawValue, -30, 40, 0, 300);
+            rawValue = `${rawValue} °C`;
+            break;
+          case 1:
+            rawValue = station.windMaxVelocityRecords.slice(-1)[0].value;
+            remappedRawValue = this.remap(rawValue, 0, 40, 180, 280);
+            rawValue = `${rawValue} m/s`;
+            break;
+          }
 
           const style = document.createElement('style'); // this part is stupid or genius
           style.id = `tooltip-style${loopIndex}`; // id for reference to remove this when changing data type
@@ -90,7 +103,7 @@ export default {
           const tooltip = L.tooltip({
             direction: 'center', permanent: true, opacity: 1.0, className: `overall tooltipStylingClass${loopIndex}`,
           });
-          tooltip.setContent(`${rawValue} °C`);
+          tooltip.setContent(rawValue);
           marker.bindTooltip(tooltip);
 
           loopIndex += 1;
