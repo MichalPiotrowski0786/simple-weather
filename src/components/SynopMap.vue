@@ -1,7 +1,7 @@
 <template>
-  <div v-if="!isLoaded" class="loadercontent">
+  <!-- <div v-if="!isLoaded" class="loadercontent">
     <img src="https://ems.medico.com.bd/css/spinner.gif" class="loader">
-  </div>
+  </div> -->
   <div id="selectorContainer">
     <select id="selector" v-model="selectedOption">
       <option v-for="option in selectorOptions" :key="option.value" :value="option.value">
@@ -26,22 +26,22 @@ export default {
       mapObject: null,
       stations: [],
       selectorOptions: [
-        { text: 'Temperature', value: '0' },
-        { text: 'Gusts', value: '1' },
+        { text: 'Temperature', value: 0 },
+        { text: 'Gusts', value: 1 },
       ],
-      layer: [],
-      selectedOption: '0',
+      markers: [],
+      selectedOption: 0,
       isLoaded: false,
     };
   },
   watch: {
     selectedOption() {
-      if (this.mapObject != null) this.updateTooltipContent(this.selectedOption);
+      if (this.mapObject != null) this.getMeasurements(this.selectedOption);
     },
   },
   mounted() {
-    this.getMeasurements(1);
     this.mountLeafletMap();
+    this.getMeasurements(this.selectedOption);
   },
   beforeDestroy() {
     this.removeLeafletMapFromMemory();
@@ -61,9 +61,17 @@ export default {
         this.mapObject.remove(); // if map was initialized, remove it when leaving this page(idk if this is necessary)
       }
     },
+    removeLeafletMarkers() {
+      if (this.markers.length > 0 && this.mapObject !== null) {
+        this.markers.forEach((marker) => {
+          this.mapObject.removeLayer(marker);
+        });
+      }
+    },
     async getMeasurements(type) {
       if (datafile != null && datafile.length > 0) {
         let stationsdata = [];
+        this.removeLeafletMarkers();
 
         await this.returnMultiplePromises(datafile).then((res) => { stationsdata = res; });
         this.isLoaded = true; // when content is loaded disable spinner
@@ -71,26 +79,22 @@ export default {
         let loopIndex = 0;
         stationsdata.forEach((station) => {
           const marker = L.marker([station.lat, station.lon], { opacity: 0.0 }).addTo(this.mapObject);
+          this.markers.push(marker);
           const styles = document.getElementById(`tooltip-style${loopIndex}`);
           if (styles !== null) styles.parentNode.removeChild(styles);
 
           let rawValue = 0;
           let remappedRawValue = 0;
-          switch (type) {
-          default:
-            rawValue = 0;
-            remappedRawValue = 0;
-            break;
-          case 0:
+          if (type === 1) {
+            rawValue = station.windMaxVelocityRecords.slice(-1)[0].value;
+            remappedRawValue = this.remap(rawValue, 0, 40, 180, 280);
+
+            rawValue *= 3.6;
+            rawValue = `${rawValue.toFixed(2)} km/h`;
+          } else { // default type - temperature
             rawValue = station.temperatureAutoRecords.slice(-1)[0].value;
             remappedRawValue = 300 - this.remap(rawValue, -30, 40, 0, 300);
             rawValue = `${rawValue} °C`;
-            break;
-          case 1:
-            rawValue = station.windMaxVelocityRecords.slice(-1)[0].value;
-            remappedRawValue = this.remap(rawValue, 0, 40, 180, 280);
-            rawValue = `${rawValue} m/s`;
-            break;
           }
 
           const style = document.createElement('style'); // this part is stupid or genius
