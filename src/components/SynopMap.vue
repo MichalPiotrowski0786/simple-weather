@@ -1,7 +1,7 @@
 <template>
-  <!-- <div v-if="!isLoaded" class="loadercontent">
+  <div v-if="!isLoaded" class="loadercontent">
     <img src="https://ems.medico.com.bd/css/spinner.gif" class="loader">
-  </div> -->
+  </div>
   <div id="selectorContainer">
     <select id="selector" v-model="selectedOption">
       <option v-for="option in selectorOptions" :key="option.value" :value="option.value">
@@ -36,7 +36,10 @@ export default {
   },
   watch: {
     selectedOption() {
-      if (this.mapObject != null) this.getMeasurements(this.selectedOption);
+      if (this.mapObject != null) {
+        this.isLoaded = false;
+        this.getMeasurements(this.selectedOption);
+      }
     },
   },
   mounted() {
