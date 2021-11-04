@@ -93,7 +93,7 @@ export default {
             remappedRawValue = this.remap(rawValue, 0, 40, 180, 280);
 
             rawValue *= 3.6;
-            rawValue = `${rawValue.toFixed(2)} km/h`;
+            rawValue = `${rawValue.toFixed(1)} km/h`;
           } else { // default type - temperature
             rawValue = station.temperatureAutoRecords.slice(-1)[0].value;
             remappedRawValue = 300 - this.remap(rawValue, -30, 40, 0, 300);
